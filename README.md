@@ -8,7 +8,7 @@ The app stores all data on the user's device and focuses on fast entry, clear ba
 
 The GitHub Pages deployment URL is:
 
-https://parasitk.github.io/budget-tracker/
+https://fabulouspixel.github.io/budget-tracker/
 
 ## Features
 
@@ -73,7 +73,7 @@ npm run test
 
 The app is intended to be deployable as a fully static website.
 
-For the repository `parasitk/budget-tracker`, the Vite base path should be configured as:
+For the repository `fabulouspixel/budget-tracker`, the Vite base path should be configured as:
 
 ```ts
 base: "/budget-tracker/"
@@ -82,7 +82,7 @@ base: "/budget-tracker/"
 This allows assets and routes to work correctly when the app is hosted through GitHub Pages at:
 
 ```text
-https://parasitk.github.io/budget-tracker/
+https://fabulouspixel.github.io/budget-tracker/
 ```
 
 Deployment is configured through GitHub Actions from the `main` branch. The local folder is not initialized as a git repository by default. To publish the app, initialize git, add the remote repository, push to `main`, and enable GitHub Pages with GitHub Actions as the source.
@@ -94,7 +94,7 @@ git init
 git add .
 git commit -m "Initial budget tracker MVP"
 git branch -M main
-git remote add origin https://github.com/parasitk/budget-tracker.git
+git remote add origin https://github.com/fabulouspixel/budget-tracker.git
 git push -u origin main
 ```
 
