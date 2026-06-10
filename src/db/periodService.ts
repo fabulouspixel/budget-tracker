@@ -34,6 +34,28 @@ export async function getArchivedPeriods(
   );
 }
 
+export async function deleteArchivedPeriod(
+  periodId: string,
+  database: BudgetTrackerDatabase = db,
+): Promise<boolean> {
+  return database.transaction("rw", database.periods, database.entries, async () => {
+    const period = await database.periods.get(periodId);
+
+    if (!period) {
+      return false;
+    }
+
+    if (period.status !== "archived") {
+      throw new Error("Only archived periods can be deleted.");
+    }
+
+    await database.entries.where("periodId").equals(periodId).delete();
+    await database.periods.delete(periodId);
+
+    return true;
+  });
+}
+
 export async function createPeriod(
   input: CreatePeriodInput,
   database: BudgetTrackerDatabase = db,

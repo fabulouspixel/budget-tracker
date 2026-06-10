@@ -1,6 +1,12 @@
 import "fake-indexeddb/auto";
 import { afterEach, describe, expect, it } from "vitest";
-import { createBackup, parseBackupJson, replaceDataFromBackup } from "./backupService";
+import {
+  createBackup,
+  deleteAllLocalData,
+  parseBackupJson,
+  replaceDataFromBackup,
+} from "./backupService";
+import { createCategory, getCategories } from "./categoryService";
 import { BudgetTrackerDatabase } from "./database";
 import { createEntry, getEntriesForPeriod } from "./entryService";
 import {
@@ -29,6 +35,7 @@ describe("backup service", () => {
   it("exports all periods and entries with version and derived categories", async () => {
     const testDatabase = createTestDatabase();
     const period = await createNewActivePeriod({ title: "Active" }, testDatabase);
+    await createCategory("Food", testDatabase);
     await createEntry(
       {
         periodId: period.id,
@@ -44,7 +51,7 @@ describe("backup service", () => {
     expect(backup.version).toBe(EXPORT_FORMAT_VERSION);
     expect(backup.periods).toHaveLength(1);
     expect(backup.entries).toHaveLength(1);
-    expect(backup.categories).toEqual(["Food"]);
+    expect(backup.categories).toMatchObject([{ name: "Food" }]);
   });
 
   it("rejects invalid backup shapes", () => {
@@ -163,5 +170,70 @@ describe("backup service", () => {
       entries: [],
     });
   });
-});
 
+  it("imports category records", async () => {
+    const testDatabase = createTestDatabase();
+    const backup: BudgetTrackerExport = {
+      version: 1,
+      periods: [],
+      entries: [],
+      categories: [
+        {
+          id: "category-imported",
+          name: "Imported",
+          createdAt: "2026-06-08T00:00:00.000Z",
+          updatedAt: "2026-06-08T00:00:00.000Z",
+        },
+      ],
+    };
+
+    await replaceDataFromBackup(backup, testDatabase);
+
+    await expect(getCategories(testDatabase)).resolves.toMatchObject([
+      { id: "category-imported", name: "Imported" },
+    ]);
+  });
+
+  it("imports legacy string categories", async () => {
+    const testDatabase = createTestDatabase();
+    const backup = parseBackupJson(
+      JSON.stringify({
+        version: 1,
+        periods: [],
+        entries: [],
+        categories: ["Food"],
+      }),
+    );
+
+    await replaceDataFromBackup(backup, testDatabase);
+
+    await expect(getCategories(testDatabase)).resolves.toMatchObject([
+      { name: "Food" },
+    ]);
+  });
+
+  it("deletes all local periods, entries, and categories", async () => {
+    const testDatabase = createTestDatabase();
+    const period = await createNewActivePeriod({ title: "Active" }, testDatabase);
+    await createCategory("Food", testDatabase);
+    await createEntry(
+      {
+        periodId: period.id,
+        type: "income",
+        amountCents: 1000,
+        category: "Food",
+      },
+      testDatabase,
+    );
+
+    await deleteAllLocalData(testDatabase);
+
+    await expect(createBackup(testDatabase)).resolves.toMatchObject({
+      periods: [],
+      entries: [],
+      categories: [],
+    });
+    await expect(getActivePeriod(testDatabase)).resolves.toBeUndefined();
+    await expect(getCategories(testDatabase)).resolves.toEqual([]);
+  });
+});

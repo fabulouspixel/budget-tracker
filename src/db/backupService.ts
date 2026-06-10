@@ -1,9 +1,9 @@
 import type { BudgetTrackerDatabase } from "./database";
 import { db } from "./database";
-import { getCategoriesFromEntries } from "./entryService";
 import {
   EXPORT_FORMAT_VERSION,
   type BudgetTrackerExport,
+  type Category,
   type Entry,
   type EntryType,
   type Period,
@@ -18,7 +18,7 @@ export async function createBackup(
   const [periods, entries, categories] = await Promise.all([
     database.periods.toArray(),
     database.entries.toArray(),
-    getCategoriesFromEntries(database),
+    database.categories.toArray(),
   ]);
 
   return {
@@ -51,12 +51,36 @@ export async function replaceDataFromBackup(
 ): Promise<void> {
   const validatedBackup = validateBackup(backup);
 
-  await database.transaction("rw", database.periods, database.entries, async () => {
-    await database.entries.clear();
-    await database.periods.clear();
-    await database.periods.bulkAdd(validatedBackup.periods);
-    await database.entries.bulkAdd(validatedBackup.entries);
-  });
+  await database.transaction(
+    "rw",
+    database.periods,
+    database.entries,
+    database.categories,
+    async () => {
+      await database.entries.clear();
+      await database.periods.clear();
+      await database.categories.clear();
+      await database.periods.bulkAdd(validatedBackup.periods);
+      await database.entries.bulkAdd(validatedBackup.entries);
+      await database.categories.bulkAdd(validatedBackup.categories);
+    },
+  );
+}
+
+export async function deleteAllLocalData(
+  database: BudgetTrackerDatabase = db,
+): Promise<void> {
+  await database.transaction(
+    "rw",
+    database.periods,
+    database.entries,
+    database.categories,
+    async () => {
+      await database.entries.clear();
+      await database.periods.clear();
+      await database.categories.clear();
+    },
+  );
 }
 
 export function validateBackup(value: unknown): BudgetTrackerExport {
@@ -75,7 +99,7 @@ export function validateBackup(value: unknown): BudgetTrackerExport {
   const periods = value.periods.map(validatePeriod);
   const entries = value.entries.map(validateEntry);
   const categories = Array.isArray(value.categories)
-    ? value.categories.filter((category): category is string => typeof category === "string")
+    ? value.categories.map(validateCategory)
     : [];
   const periodIds = new Set(periods.map((period) => period.id));
   const activePeriodCount = periods.filter(
@@ -166,6 +190,39 @@ function validateEntry(value: unknown): Entry {
     title: value.title,
     date: value.date,
     category: value.category,
+    createdAt: value.createdAt,
+    updatedAt: value.updatedAt,
+  };
+}
+
+function validateCategory(value: unknown): Category {
+  if (typeof value === "string") {
+    const timestamp = new Date().toISOString();
+
+    return {
+      id: `legacy-category-${value.toLocaleLowerCase()}`,
+      name: value,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    };
+  }
+
+  if (!isRecord(value)) {
+    throw new Error("Backup contains an invalid category.");
+  }
+
+  if (
+    typeof value.id !== "string" ||
+    typeof value.name !== "string" ||
+    typeof value.createdAt !== "string" ||
+    typeof value.updatedAt !== "string"
+  ) {
+    throw new Error("Backup contains an invalid category.");
+  }
+
+  return {
+    id: value.id,
+    name: value.name,
     createdAt: value.createdAt,
     updatedAt: value.updatedAt,
   };

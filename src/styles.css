@@ -187,6 +187,73 @@ h1 {
   gap: 0.75rem;
 }
 
+.settings-panel,
+.category-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.category-list {
+  max-height: 18rem;
+  overflow: auto;
+  padding-right: 0.15rem;
+}
+
+.settings-panel {
+  padding-top: 0.5rem;
+}
+
+.danger-panel {
+  border-top: 1px solid #e6d8d8;
+  padding-top: 1rem;
+}
+
+.settings-panel h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.inline-form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.inline-form label {
+  display: grid;
+  gap: 0.4rem;
+  color: #33413b;
+  font-weight: 700;
+}
+
+.inline-form input {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid #c9d5cf;
+  border-radius: 8px;
+  padding: 0 0.8rem;
+  background: #ffffff;
+  color: #18211f;
+}
+
+.category-list-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.75rem;
+  border: 1px solid #dce3dc;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.category-list-item .inline-form {
+  grid-column: 1 / -1;
+}
+
+.category-name {
+  font-weight: 750;
+}
+
 .stacked-form {
   display: grid;
   gap: 1rem;
@@ -203,7 +270,8 @@ h1 {
   font-weight: 700;
 }
 
-.stacked-form input {
+.stacked-form input,
+.stacked-form select {
   width: 100%;
   min-height: 48px;
   border: 1px solid #c9d5cf;
@@ -213,9 +281,77 @@ h1 {
   color: #18211f;
 }
 
-.stacked-form input:focus {
+.stacked-form input:focus,
+.stacked-form select:focus {
   border-color: #246b54;
   outline: 3px solid #d7ebe4;
+}
+
+.combo-field {
+  display: grid;
+  grid-template-columns: 1fr 48px;
+}
+
+.combo-field input {
+  border-radius: 8px 0 0 8px;
+}
+
+.combo-toggle {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #c9d5cf;
+  border-left: 0;
+  border-radius: 0 8px 8px 0;
+  background: #ffffff;
+  color: #23443a;
+  cursor: pointer;
+}
+
+.combo-toggle:disabled {
+  cursor: not-allowed;
+}
+
+.combo-toggle svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.combo-menu {
+  display: grid;
+  max-height: 12rem;
+  margin-top: -0.45rem;
+  overflow: auto;
+  border: 1px solid #c9d5cf;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.combo-menu button {
+  min-height: 44px;
+  border: 0;
+  border-bottom: 1px solid #edf1ee;
+  padding: 0 0.8rem;
+  background: #ffffff;
+  color: #18211f;
+  text-align: left;
+  cursor: pointer;
+}
+
+.combo-menu button:last-child {
+  border-bottom: 0;
+}
+
+.combo-menu button:hover,
+.combo-menu button:focus-visible {
+  background: #e5f2ed;
+  outline: 0;
 }
 
 .entry-toolbar,
@@ -223,6 +359,40 @@ h1 {
 .entry-actions {
   display: grid;
   gap: 0.75rem;
+}
+
+.entry-actions {
+  grid-template-columns: repeat(2, 44px);
+  justify-content: end;
+}
+
+.icon-action {
+  display: inline-flex;
+  width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #c9d5cf;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #23443a;
+  cursor: pointer;
+}
+
+.icon-action svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.danger-icon-action {
+  border-color: #e0b9b9;
+  background: #fff7f7;
+  color: #8b2626;
 }
 
 .danger-action {
@@ -325,8 +495,17 @@ dd {
 }
 
 .period-list-link:hover {
-  border-color: #9fb7ad;
+  color: #124534;
   transform: translateY(-1px);
+}
+
+.period-list-content {
+  display: grid;
+  gap: 1rem;
+}
+
+.period-delete-action {
+  justify-self: end;
 }
 
 .period-list-item h2,
@@ -339,6 +518,8 @@ dd {
   border: 1px solid #dce3dc;
   border-radius: 8px;
   background: #ffffff;
+  grid-template-columns: 1fr auto;
+  align-items: center;
 }
 
 .entry-list-item-muted {
@@ -375,6 +556,7 @@ dd {
 .primary-action:focus-visible,
 .secondary-action:focus-visible,
 .danger-action:focus-visible,
+.icon-action:focus-visible,
 .secondary-link:focus-visible,
 .file-action:focus-within,
 .app-nav a:focus-visible {
@@ -417,6 +599,11 @@ dd {
     grid-template-columns: repeat(2, max-content);
   }
 
+  .inline-form {
+    grid-template-columns: minmax(14rem, 1fr) max-content;
+    align-items: end;
+  }
+
   .section-heading {
     grid-template-columns: 1fr auto;
     align-items: start;
@@ -428,14 +615,8 @@ dd {
   }
 
   .entry-toolbar,
-  .form-actions,
-  .entry-actions {
+  .form-actions {
     grid-template-columns: repeat(2, max-content);
-  }
-
-  .entry-list-item {
-    grid-template-columns: 1fr auto;
-    align-items: center;
   }
 
   .danger-action {

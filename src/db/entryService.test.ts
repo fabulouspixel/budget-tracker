@@ -158,6 +158,25 @@ describe("entry service", () => {
     ]);
   });
 
+  it("saves new entry categories as managed suggestions", async () => {
+    const testDatabase = createTestDatabase();
+    const period = await createNewActivePeriod({ title: "Active" }, testDatabase);
+
+    await createEntry(
+      {
+        periodId: period.id,
+        type: "expense",
+        amountCents: 500,
+        category: "Utilities",
+      },
+      testDatabase,
+    );
+
+    await expect(getCategoriesFromEntries(testDatabase)).resolves.toEqual([
+      "Utilities",
+    ]);
+  });
+
   it("sorts entries newest first by date and createdAt", async () => {
     const testDatabase = createTestDatabase();
     const period = await createNewActivePeriod({ title: "Active" }, testDatabase);

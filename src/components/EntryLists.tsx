@@ -36,18 +36,29 @@ export function EditableEntryList({
           <EntrySummary entry={entry} />
           <div className="entry-actions">
             <button
-              className="secondary-action"
-              type="button"
-              onClick={() => onEdit(entry)}
-            >
-              Edit
-            </button>
-            <button
-              className="danger-action"
+              aria-label="Delete entry"
+              className="icon-action danger-icon-action"
               type="button"
               onClick={() => void onDelete(entry)}
             >
-              Delete
+              <svg aria-hidden="true" viewBox="0 0 24 24">
+                <path d="M5 7h14" />
+                <path d="M10 11v6" />
+                <path d="M14 11v6" />
+                <path d="M6 7l1 14h10l1-14" />
+                <path d="M9 7V4h6v3" />
+              </svg>
+            </button>
+            <button
+              aria-label="Edit entry"
+              className="icon-action"
+              type="button"
+              onClick={() => onEdit(entry)}
+            >
+              <svg aria-hidden="true" viewBox="0 0 24 24">
+                <path d="M4 20h4l11-11-4-4L4 16v4Z" />
+                <path d="m14 6 4 4" />
+              </svg>
             </button>
           </div>
         </article>

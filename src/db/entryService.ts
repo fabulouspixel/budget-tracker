@@ -1,4 +1,5 @@
 import type { BudgetTrackerDatabase } from "./database";
+import { ensureCategoryByName, getCategorySuggestions } from "./categoryService";
 import { db } from "./database";
 import {
   normalizeEntryDate,
@@ -39,6 +40,12 @@ export async function createEntry(
   database: BudgetTrackerDatabase = db,
 ): Promise<Entry> {
   const timestamp = createTimestamp();
+  const category = normalizeOptionalText(input.category);
+
+  if (category) {
+    await ensureCategoryByName(category, database);
+  }
+
   const entry: Entry = {
     id: createId(),
     periodId: input.periodId,
@@ -46,7 +53,7 @@ export async function createEntry(
     amountCents: validateEntryAmountCents(input.amountCents),
     title: normalizeOptionalText(input.title),
     date: normalizeEntryDate(input.date),
-    category: normalizeOptionalText(input.category),
+    category,
     createdAt: timestamp,
     updatedAt: timestamp,
   };
@@ -67,13 +74,19 @@ export async function updateEntry(
     throw new Error("Entry was not found.");
   }
 
+  const category = normalizeOptionalText(input.category);
+
+  if (category) {
+    await ensureCategoryByName(category, database);
+  }
+
   const updatedEntry: Entry = {
     ...existingEntry,
     type: validateEntryType(input.type),
     amountCents: validateEntryAmountCents(input.amountCents),
     title: normalizeOptionalText(input.title),
     date: normalizeEntryDate(input.date),
-    category: normalizeOptionalText(input.category),
+    category,
     updatedAt: createTimestamp(),
   };
 
@@ -92,18 +105,7 @@ export async function deleteEntry(
 export async function getCategoriesFromEntries(
   database: BudgetTrackerDatabase = db,
 ): Promise<string[]> {
-  const entries = await database.entries.toArray();
-  const categories = new Set<string>();
-
-  for (const entry of entries) {
-    const category = normalizeOptionalText(entry.category);
-
-    if (category) {
-      categories.add(category);
-    }
-  }
-
-  return [...categories].sort((left, right) => left.localeCompare(right));
+  return getCategorySuggestions(database);
 }
 
 export function sortEntriesNewestFirst(entries: Entry[]): Entry[] {
@@ -121,4 +123,3 @@ export function sortEntriesNewestFirst(entries: Entry[]): Entry[] {
 export function getEntryDateForInput(entry: Pick<Entry, "date">): ISODate {
   return entry.date;
 }
-

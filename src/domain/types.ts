@@ -29,9 +29,16 @@ export interface Entry {
   updatedAt: Timestamp;
 }
 
+export interface Category {
+  id: string;
+  name: string;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
+
 export interface BudgetTrackerExport {
   version: typeof EXPORT_FORMAT_VERSION;
   periods: Period[];
   entries: Entry[];
-  categories: string[];
+  categories: Category[];
 }

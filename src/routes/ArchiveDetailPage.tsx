@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { ReadOnlyEntryList } from "../components/EntryLists";
 import { getEntriesForPeriod } from "../db/entryService";
-import { getPeriodById } from "../db/periodService";
+import { deleteArchivedPeriod, getPeriodById } from "../db/periodService";
 import { calculateBalanceCents } from "../domain/balance";
 import { formatCents } from "../domain/money";
 import type { Entry, Period } from "../domain/types";
@@ -10,6 +10,7 @@ import { formatDate } from "../utils/format";
 
 export function ArchiveDetailPage() {
   const { periodId } = useParams();
+  const navigate = useNavigate();
   const [period, setPeriod] = useState<Period | undefined>();
   const [entries, setEntries] = useState<Entry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -68,6 +69,29 @@ export function ArchiveDetailPage() {
     entries,
   );
 
+  async function handleDeleteArchivedPeriod() {
+    if (!period) {
+      return;
+    }
+
+    const canDelete = window.confirm(
+      "Delete this archived period? Its entries will also be deleted.",
+    );
+
+    if (!canDelete) {
+      return;
+    }
+
+    setErrorMessage(undefined);
+
+    try {
+      await deleteArchivedPeriod(period.id);
+      navigate("/archive");
+    } catch {
+      setErrorMessage("The archived period could not be deleted.");
+    }
+  }
+
   return (
     <section className="page-section" aria-labelledby="archive-detail-title">
       {errorMessage ? <p className="error-message">{errorMessage}</p> : null}
@@ -87,6 +111,16 @@ export function ArchiveDetailPage() {
         <Link className="secondary-link" to="/archive">
           Back to archive
         </Link>
+        {period.status === "archived" ? (
+          <button
+            aria-label="Delete archived period"
+            className="danger-action"
+            type="button"
+            onClick={() => void handleDeleteArchivedPeriod()}
+          >
+            Delete period
+          </button>
+        ) : null}
       </div>
 
       <dl className="summary-grid">

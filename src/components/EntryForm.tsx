@@ -31,8 +31,12 @@ export function EntryForm({ categories, mode, onCancel, onSubmit }: EntryFormPro
   const [title, setTitle] = useState(entry?.title ?? "");
   const [date, setDate] = useState(entry?.date ?? createLocalDate());
   const [category, setCategory] = useState(entry?.category ?? "");
+  const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const filteredCategories = categories.filter((categoryName) =>
+    categoryName.toLocaleLowerCase().includes(category.trim().toLocaleLowerCase()),
+  );
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -111,18 +115,46 @@ export function EntryForm({ categories, mode, onCancel, onSubmit }: EntryFormPro
 
       <label>
         <span>Category</span>
-        <input
-          list="entry-category-suggestions"
-          value={category}
-          onChange={(event) => setCategory(event.target.value)}
-          placeholder="No category"
-        />
+        <div className="combo-field">
+          <input
+            value={category}
+            onChange={(event) => {
+              setCategory(event.target.value);
+              setIsCategoryMenuOpen(categories.length > 0);
+            }}
+            onFocus={() => setIsCategoryMenuOpen(categories.length > 0)}
+            placeholder="No category"
+          />
+          <button
+            aria-label="Show categories"
+            className="combo-toggle"
+            disabled={categories.length === 0}
+            type="button"
+            onClick={() => setIsCategoryMenuOpen((current) => !current)}
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </button>
+        </div>
       </label>
-      <datalist id="entry-category-suggestions">
-        {categories.map((categoryName) => (
-          <option key={categoryName} value={categoryName} />
-        ))}
-      </datalist>
+
+      {isCategoryMenuOpen && filteredCategories.length > 0 ? (
+        <div className="combo-menu">
+          {filteredCategories.map((categoryName) => (
+            <button
+              key={categoryName}
+              type="button"
+              onClick={() => {
+                setCategory(categoryName);
+                setIsCategoryMenuOpen(false);
+              }}
+            >
+              {categoryName}
+            </button>
+          ))}
+        </div>
+      ) : null}
 
       {errorMessage ? <p className="error-message">{errorMessage}</p> : null}
 
@@ -137,4 +169,3 @@ export function EntryForm({ categories, mode, onCancel, onSubmit }: EntryFormPro
     </form>
   );
 }
-

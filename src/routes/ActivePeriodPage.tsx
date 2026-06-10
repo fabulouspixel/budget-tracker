@@ -126,47 +126,63 @@ export function ActivePeriodPage() {
               </h1>
               <p className="muted">Created {formatDate(activePeriod.createdAt)}</p>
             </div>
-            <button
-              className="secondary-action"
-              type="button"
-              onClick={() => setIsPeriodFormVisible((current) => !current)}
-            >
-              New Period
-            </button>
+            {!entryFormMode && !isPeriodFormVisible ? (
+              <button
+                className="secondary-action"
+                type="button"
+                onClick={() => {
+                  setEntryFormMode(undefined);
+                  setIsPeriodFormVisible(true);
+                }}
+              >
+                New Period
+              </button>
+            ) : null}
           </div>
 
-          <dl className="summary-grid">
-            <div>
-              <dt>Current balance</dt>
-              <dd>{formatCents(balanceCents)}</dd>
-            </div>
-          </dl>
+          {!isPeriodFormVisible ? (
+            <dl className="summary-grid">
+              <div>
+                <dt>Current balance</dt>
+                <dd>{formatCents(balanceCents)}</dd>
+              </div>
+            </dl>
+          ) : null}
 
           {isPeriodFormVisible ? (
             <PeriodForm
+              onCancel={() => setIsPeriodFormVisible(false)}
               submitLabel="Create New Period"
               onSubmit={handleCreatePeriod}
             />
           ) : null}
 
-          <div className="entry-toolbar" aria-label="Entry actions">
-            <button
-              className="primary-action"
-              type="button"
-              onClick={() => setEntryFormMode({ type: "create", entryType: "income" })}
-            >
-              Add Income
-            </button>
-            <button
-              className="secondary-action"
-              type="button"
-              onClick={() => setEntryFormMode({ type: "create", entryType: "expense" })}
-            >
-              Add Expense
-            </button>
-          </div>
+          {!isPeriodFormVisible && !entryFormMode ? (
+            <>
+              <div className="entry-toolbar" aria-label="Entry actions">
+                <button
+                  className="primary-action"
+                  type="button"
+                  onClick={() =>
+                    setEntryFormMode({ type: "create", entryType: "income" })
+                  }
+                >
+                  Add Income
+                </button>
+                <button
+                  className="secondary-action"
+                  type="button"
+                  onClick={() =>
+                    setEntryFormMode({ type: "create", entryType: "expense" })
+                  }
+                >
+                  Add Expense
+                </button>
+              </div>
+            </>
+          ) : null}
 
-          {entryFormMode ? (
+          {!isPeriodFormVisible && entryFormMode ? (
             <EntryForm
               categories={categories}
               mode={entryFormMode}
@@ -175,13 +191,15 @@ export function ActivePeriodPage() {
             />
           ) : null}
 
-          <EditableEntryList
-            entries={entries}
-            onDelete={handleDeleteEntry}
-            onEdit={(entry) => setEntryFormMode({ type: "edit", entry })}
-            periodCreatedAt={activePeriod.createdAt}
-            startingBudgetCents={activePeriod.startingBudgetCents}
-          />
+          {!isPeriodFormVisible ? (
+            <EditableEntryList
+              entries={entries}
+              onDelete={handleDeleteEntry}
+              onEdit={(entry) => setEntryFormMode({ type: "edit", entry })}
+              periodCreatedAt={activePeriod.createdAt}
+              startingBudgetCents={activePeriod.startingBudgetCents}
+            />
+          ) : null}
         </>
       )}
     </section>

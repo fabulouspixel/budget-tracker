@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import {
+  createId,
   normalizePeriodTitle,
   parseOptionalStartingBudget,
   shouldCreateNewPeriod,
@@ -24,5 +25,8 @@ describe("period helpers", () => {
     expect(shouldCreateNewPeriod(true, confirmReplacement)).toBe(false);
     expect(confirmReplacement).toHaveBeenCalledOnce();
   });
-});
 
+  it("creates an id without requiring crypto.randomUUID", () => {
+    expect(createId()).toMatch(/.+/);
+  });
+});

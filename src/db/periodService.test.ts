@@ -1,10 +1,12 @@
 import "fake-indexeddb/auto";
 import { afterEach, describe, expect, it } from "vitest";
 import { BudgetTrackerDatabase } from "./database";
+import { createEntry, getEntriesForPeriod } from "./entryService";
 import {
   archiveActivePeriod,
   createNewActivePeriod,
   createPeriod,
+  deleteArchivedPeriod,
   getActivePeriod,
   getArchivedPeriods,
 } from "./periodService";
@@ -111,5 +113,37 @@ describe("period service", () => {
     expect(activePeriods).toHaveLength(1);
     expect(activePeriods[0].title).toBe("Third");
   });
-});
 
+  it("deletes archived periods and their entries", async () => {
+    const testDatabase = createTestDatabase();
+    const period = await createNewActivePeriod({ title: "Archived" }, testDatabase);
+    await createEntry(
+      {
+        periodId: period.id,
+        type: "income",
+        amountCents: 1200,
+      },
+      testDatabase,
+    );
+    const archivedPeriod = await archiveActivePeriod(testDatabase);
+
+    await expect(
+      deleteArchivedPeriod(archivedPeriod?.id ?? "", testDatabase),
+    ).resolves.toBe(true);
+
+    await expect(getArchivedPeriods(testDatabase)).resolves.toEqual([]);
+    await expect(getEntriesForPeriod(period.id, testDatabase)).resolves.toEqual([]);
+  });
+
+  it("does not delete active periods", async () => {
+    const testDatabase = createTestDatabase();
+    const period = await createNewActivePeriod({ title: "Active" }, testDatabase);
+
+    await expect(deleteArchivedPeriod(period.id, testDatabase)).rejects.toThrow(
+      "Only archived periods can be deleted.",
+    );
+    await expect(getActivePeriod(testDatabase)).resolves.toMatchObject({
+      id: period.id,
+    });
+  });
+});

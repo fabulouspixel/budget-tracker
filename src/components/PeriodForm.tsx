@@ -7,11 +7,12 @@ export interface PeriodFormValues {
 }
 
 interface PeriodFormProps {
+  onCancel?: () => void;
   submitLabel: string;
   onSubmit: (values: PeriodFormValues) => Promise<void>;
 }
 
-export function PeriodForm({ submitLabel, onSubmit }: PeriodFormProps) {
+export function PeriodForm({ onCancel, submitLabel, onSubmit }: PeriodFormProps) {
   const [title, setTitle] = useState("");
   const [startingBudget, setStartingBudget] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
@@ -65,7 +66,16 @@ export function PeriodForm({ submitLabel, onSubmit }: PeriodFormProps) {
       <button className="primary-action" type="submit" disabled={isSubmitting}>
         {isSubmitting ? "Saving..." : submitLabel}
       </button>
+      {onCancel ? (
+        <button
+          className="secondary-action"
+          type="button"
+          disabled={isSubmitting}
+          onClick={onCancel}
+        >
+          Cancel
+        </button>
+      ) : null}
     </form>
   );
 }
-
