@@ -1,5 +1,6 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { CategoryCombobox } from "../components/CategoryCombobox";
 import {
   BACKUP_FILE_NAME,
   createBackup,
@@ -12,7 +13,6 @@ import {
   createCategory,
   deleteCategory,
   getCategories,
-  renameCategory,
 } from "../db/categoryService";
 import type { Category } from "../domain/types";
 
@@ -20,8 +20,6 @@ export function SettingsPage() {
   const navigate = useNavigate();
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoryName, setCategoryName] = useState("");
-  const [editingCategoryId, setEditingCategoryId] = useState<string | undefined>();
-  const [editingCategoryName, setEditingCategoryName] = useState("");
   const [statusMessage, setStatusMessage] = useState<string | undefined>();
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const [isImporting, setIsImporting] = useState(false);
@@ -90,42 +88,18 @@ export function SettingsPage() {
     }
   }
 
-  async function handleCreateCategory(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function handleCreateCategory(name: string) {
     setStatusMessage(undefined);
     setErrorMessage(undefined);
 
     try {
-      await createCategory(categoryName);
+      await createCategory(name);
       setCategoryName("");
       await loadCategories();
       setStatusMessage("Category created.");
     } catch (error) {
       setErrorMessage(
         error instanceof Error ? error.message : "The category could not be created.",
-      );
-    }
-  }
-
-  async function handleRenameCategory(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    if (!editingCategoryId) {
-      return;
-    }
-
-    setStatusMessage(undefined);
-    setErrorMessage(undefined);
-
-    try {
-      await renameCategory(editingCategoryId, editingCategoryName);
-      setEditingCategoryId(undefined);
-      setEditingCategoryName("");
-      await loadCategories();
-      setStatusMessage("Category renamed.");
-    } catch (error) {
-      setErrorMessage(
-        error instanceof Error ? error.message : "The category could not be renamed.",
       );
     }
   }
@@ -144,6 +118,9 @@ export function SettingsPage() {
 
     try {
       await deleteCategory(category.id);
+      if (categoryName === category.name) {
+        setCategoryName("");
+      }
       await loadCategories();
       setStatusMessage("Category deleted.");
     } catch {
@@ -177,8 +154,8 @@ export function SettingsPage() {
 
   return (
     <section className="page-section" aria-labelledby="settings-title">
-      <h1 className="compact-title" id="settings-title">
-        Backup and app settings
+      <h1 className="settings-title" id="settings-title">
+        Backup
       </h1>
       <p className="muted">
         Export your local data or replace it with a JSON backup.
@@ -208,99 +185,30 @@ export function SettingsPage() {
           Manage the category suggestions used when adding or editing entries.
         </p>
 
-        <form className="inline-form" onSubmit={handleCreateCategory}>
-          <label>
-            <span>New category</span>
-            <input
-              value={categoryName}
-              onChange={(event) => setCategoryName(event.target.value)}
-              placeholder="Groceries"
-            />
-          </label>
-          <button className="primary-action" type="submit">
-            Add
-          </button>
-        </form>
+        <CategoryCombobox
+          addLabel="Add category"
+          categories={categories}
+          label="Category"
+          placeholder="No category"
+          value={categoryName}
+          onAdd={(name) => void handleCreateCategory(name)}
+          onChange={setCategoryName}
+          onDelete={(category) => {
+            const managedCategory = categories.find(
+              (candidate) => candidate.id === category.id,
+            );
+
+            if (!managedCategory) {
+              return;
+            }
+
+            void handleDeleteCategory(managedCategory);
+          }}
+        />
 
         {categories.length === 0 ? (
           <p className="muted">No categories yet.</p>
-        ) : (
-          <div className="category-list">
-            {categories.map((category) => (
-              <article className="category-list-item" key={category.id}>
-                {editingCategoryId === category.id ? (
-                  <form className="inline-form" onSubmit={handleRenameCategory}>
-                    <label>
-                      <span>Category name</span>
-                      <input
-                        autoFocus
-                        value={editingCategoryName}
-                        onChange={(event) =>
-                          setEditingCategoryName(event.target.value)
-                        }
-                      />
-                    </label>
-                    <div className="entry-actions">
-                      <button className="icon-action" type="submit" aria-label="Save category">
-                        <svg aria-hidden="true" viewBox="0 0 24 24">
-                          <path d="m5 12 4 4L19 6" />
-                        </svg>
-                      </button>
-                      <button
-                        className="icon-action"
-                        type="button"
-                        aria-label="Cancel category edit"
-                        onClick={() => {
-                          setEditingCategoryId(undefined);
-                          setEditingCategoryName("");
-                        }}
-                      >
-                        <svg aria-hidden="true" viewBox="0 0 24 24">
-                          <path d="M18 6 6 18" />
-                          <path d="m6 6 12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                  </form>
-                ) : (
-                  <>
-                    <span className="category-name">{category.name}</span>
-                    <div className="entry-actions">
-                      <button
-                        aria-label="Delete category"
-                        className="icon-action danger-icon-action"
-                        type="button"
-                        onClick={() => void handleDeleteCategory(category)}
-                      >
-                        <svg aria-hidden="true" viewBox="0 0 24 24">
-                          <path d="M5 7h14" />
-                          <path d="M10 11v6" />
-                          <path d="M14 11v6" />
-                          <path d="M6 7l1 14h10l1-14" />
-                          <path d="M9 7V4h6v3" />
-                        </svg>
-                      </button>
-                      <button
-                        aria-label="Edit category"
-                        className="icon-action"
-                        type="button"
-                        onClick={() => {
-                          setEditingCategoryId(category.id);
-                          setEditingCategoryName(category.name);
-                        }}
-                      >
-                        <svg aria-hidden="true" viewBox="0 0 24 24">
-                          <path d="M4 20h4l11-11-4-4L4 16v4Z" />
-                          <path d="m14 6 4 4" />
-                        </svg>
-                      </button>
-                    </div>
-                  </>
-                )}
-              </article>
-            ))}
-          </div>
-        )}
+        ) : null}
       </section>
 
       <section className="settings-panel danger-panel" aria-labelledby="local-data-title">

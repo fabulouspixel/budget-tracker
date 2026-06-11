@@ -1,4 +1,5 @@
 import { type FormEvent, useState } from "react";
+import { CategoryCombobox } from "./CategoryCombobox";
 import { createLocalDate, parseEntryAmount } from "../domain/entry";
 import type { Entry, EntryType } from "../domain/types";
 import { centsToInputValue } from "../utils/format";
@@ -31,12 +32,8 @@ export function EntryForm({ categories, mode, onCancel, onSubmit }: EntryFormPro
   const [title, setTitle] = useState(entry?.title ?? "");
   const [date, setDate] = useState(entry?.date ?? createLocalDate());
   const [category, setCategory] = useState(entry?.category ?? "");
-  const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const filteredCategories = categories.filter((categoryName) =>
-    categoryName.toLocaleLowerCase().includes(category.trim().toLocaleLowerCase()),
-  );
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -113,48 +110,12 @@ export function EntryForm({ categories, mode, onCancel, onSubmit }: EntryFormPro
         />
       </label>
 
-      <label>
-        <span>Category</span>
-        <div className="combo-field">
-          <input
-            value={category}
-            onChange={(event) => {
-              setCategory(event.target.value);
-              setIsCategoryMenuOpen(categories.length > 0);
-            }}
-            onFocus={() => setIsCategoryMenuOpen(categories.length > 0)}
-            placeholder="No category"
-          />
-          <button
-            aria-label="Show categories"
-            className="combo-toggle"
-            disabled={categories.length === 0}
-            type="button"
-            onClick={() => setIsCategoryMenuOpen((current) => !current)}
-          >
-            <svg aria-hidden="true" viewBox="0 0 24 24">
-              <path d="m6 9 6 6 6-6" />
-            </svg>
-          </button>
-        </div>
-      </label>
-
-      {isCategoryMenuOpen && filteredCategories.length > 0 ? (
-        <div className="combo-menu">
-          {filteredCategories.map((categoryName) => (
-            <button
-              key={categoryName}
-              type="button"
-              onClick={() => {
-                setCategory(categoryName);
-                setIsCategoryMenuOpen(false);
-              }}
-            >
-              {categoryName}
-            </button>
-          ))}
-        </div>
-      ) : null}
+      <CategoryCombobox
+        categories={categories.map((categoryName) => ({ name: categoryName }))}
+        label="Category"
+        value={category}
+        onChange={setCategory}
+      />
 
       {errorMessage ? <p className="error-message">{errorMessage}</p> : null}
 

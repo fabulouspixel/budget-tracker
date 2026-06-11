@@ -208,9 +208,11 @@ h1 {
   padding-top: 1rem;
 }
 
+.settings-title,
 .settings-panel h2 {
   margin: 0;
   font-size: 1.2rem;
+  line-height: 1.25;
 }
 
 .inline-form {
@@ -263,7 +265,8 @@ h1 {
   background: #ffffff;
 }
 
-.stacked-form label {
+.stacked-form label,
+.combo-control label {
   display: grid;
   gap: 0.4rem;
   color: #33413b;
@@ -271,7 +274,8 @@ h1 {
 }
 
 .stacked-form input,
-.stacked-form select {
+.stacked-form select,
+.combo-control input {
   width: 100%;
   min-height: 48px;
   border: 1px solid #c9d5cf;
@@ -282,9 +286,15 @@ h1 {
 }
 
 .stacked-form input:focus,
-.stacked-form select:focus {
+.stacked-form select:focus,
+.combo-control input:focus {
   border-color: #246b54;
   outline: 3px solid #d7ebe4;
+}
+
+.combo-control {
+  display: grid;
+  gap: 0.4rem;
 }
 
 .combo-field {
@@ -292,11 +302,16 @@ h1 {
   grid-template-columns: 1fr 48px;
 }
 
+.combo-field-with-add {
+  grid-template-columns: 1fr 48px 48px;
+}
+
 .combo-field input {
   border-radius: 8px 0 0 8px;
 }
 
-.combo-toggle {
+.combo-toggle,
+.combo-icon-button {
   display: inline-flex;
   min-height: 48px;
   align-items: center;
@@ -309,11 +324,21 @@ h1 {
   cursor: pointer;
 }
 
+.combo-icon-button {
+  border-radius: 0;
+}
+
+.combo-icon-button:disabled {
+  cursor: not-allowed;
+}
+
 .combo-toggle:disabled {
   cursor: not-allowed;
 }
 
-.combo-toggle svg {
+.combo-toggle svg,
+.combo-icon-button svg,
+.combo-menu-delete svg {
   width: 20px;
   height: 20px;
   fill: none;
@@ -333,10 +358,22 @@ h1 {
   background: #ffffff;
 }
 
-.combo-menu button {
+.combo-menu-row {
+  display: grid;
+  border-bottom: 1px solid #edf1ee;
+}
+
+.combo-menu-row-with-action {
+  grid-template-columns: 1fr 44px;
+}
+
+.combo-menu-row:last-child {
+  border-bottom: 0;
+}
+
+.combo-menu-option {
   min-height: 44px;
   border: 0;
-  border-bottom: 1px solid #edf1ee;
   padding: 0 0.8rem;
   background: #ffffff;
   color: #18211f;
@@ -344,13 +381,26 @@ h1 {
   cursor: pointer;
 }
 
-.combo-menu button:last-child {
-  border-bottom: 0;
+.combo-menu-delete {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: #fff7f7;
+  color: #8b2626;
+  cursor: pointer;
 }
 
-.combo-menu button:hover,
-.combo-menu button:focus-visible {
+.combo-menu-option:hover,
+.combo-menu-option:focus-visible {
   background: #e5f2ed;
+  outline: 0;
+}
+
+.combo-menu-delete:hover,
+.combo-menu-delete:focus-visible {
+  background: #f8e9e9;
   outline: 0;
 }
 

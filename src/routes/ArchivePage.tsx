@@ -62,7 +62,7 @@ export function ArchivePage() {
 
   return (
     <section className="page-section" aria-labelledby="archive-title">
-      <h1 className="compact-title" id="archive-title">
+      <h1 className="settings-title" id="archive-title">
         Archived periods
       </h1>
       {errorMessage ? <p className="error-message">{errorMessage}</p> : null}
