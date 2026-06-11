@@ -98,6 +98,18 @@ git remote add origin https://github.com/fabulouspixel/budget-tracker.git
 git push -u origin main
 ```
 
+## Install as App
+
+The app includes a web app manifest and service worker so supported browsers can install it as a Progressive Web App.
+
+On Android Chrome, open the deployed app and use the browser menu to choose `Install app` or `Add to Home screen`.
+
+PWA installation requires HTTPS. GitHub Pages provides HTTPS for:
+
+```text
+https://fabulouspixel.github.io/budget-tracker/
+```
+
 ## Data & Privacy
 
 All budget data stays on the user's device. The app does not require a backend, account, login, or cloud synchronization.

@@ -9,3 +9,12 @@ createRoot(document.getElementById("root")!).render(
   </StrictMode>,
 );
 
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    const serviceWorkerUrl = `${import.meta.env.BASE_URL}sw.js`;
+
+    navigator.serviceWorker.register(serviceWorkerUrl, {
+      scope: import.meta.env.BASE_URL,
+    }).catch(() => undefined);
+  });
+}
