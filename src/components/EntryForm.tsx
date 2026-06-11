@@ -32,6 +32,9 @@ export function EntryForm({ categories, mode, onCancel, onSubmit }: EntryFormPro
   const [title, setTitle] = useState(entry?.title ?? "");
   const [date, setDate] = useState(entry?.date ?? createLocalDate());
   const [category, setCategory] = useState(entry?.category ?? "");
+  const [isDetailsVisible, setIsDetailsVisible] = useState(
+    Boolean(entry?.title || (entry && entry.date !== createLocalDate())),
+  );
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -91,31 +94,43 @@ export function EntryForm({ categories, mode, onCancel, onSubmit }: EntryFormPro
         />
       </label>
 
-      <label>
-        <span>Date</span>
-        <input
-          required
-          type="date"
-          value={date}
-          onChange={(event) => setDate(event.target.value)}
-        />
-      </label>
-
-      <label>
-        <span>Title</span>
-        <input
-          value={title}
-          onChange={(event) => setTitle(event.target.value)}
-          placeholder="Optional description"
-        />
-      </label>
-
       <CategoryCombobox
         categories={categories.map((categoryName) => ({ name: categoryName }))}
         label="Category"
         value={category}
         onChange={setCategory}
       />
+
+      <button
+        className="details-toggle"
+        type="button"
+        onClick={() => setIsDetailsVisible((current) => !current)}
+      >
+        {isDetailsVisible ? "Hide details" : "More details"}
+      </button>
+
+      {isDetailsVisible ? (
+        <div className="entry-details">
+          <label>
+            <span>Title</span>
+            <input
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              placeholder="Optional description"
+            />
+          </label>
+
+          <label>
+            <span>Date</span>
+            <input
+              required
+              type="date"
+              value={date}
+              onChange={(event) => setDate(event.target.value)}
+            />
+          </label>
+        </div>
+      ) : null}
 
       {errorMessage ? <p className="error-message">{errorMessage}</p> : null}
 

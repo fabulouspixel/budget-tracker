@@ -119,6 +119,15 @@ export function ActivePeriodPage() {
         </>
       ) : (
         <>
+          {!isPeriodFormVisible ? (
+            <dl className="summary-grid">
+              <div>
+                <dt>Current balance</dt>
+                <dd>{formatCents(balanceCents)}</dd>
+              </div>
+            </dl>
+          ) : null}
+
           <div className="section-heading">
             <div>
               <h1 className="compact-title" id="active-period-title">
@@ -139,15 +148,6 @@ export function ActivePeriodPage() {
               </button>
             ) : null}
           </div>
-
-          {!isPeriodFormVisible ? (
-            <dl className="summary-grid">
-              <div>
-                <dt>Current balance</dt>
-                <dd>{formatCents(balanceCents)}</dd>
-              </div>
-            </dl>
-          ) : null}
 
           {isPeriodFormVisible ? (
             <PeriodForm

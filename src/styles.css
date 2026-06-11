@@ -297,6 +297,22 @@ h1 {
   gap: 0.4rem;
 }
 
+.details-toggle {
+  justify-self: start;
+  min-height: 44px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #246b54;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.entry-details {
+  display: grid;
+  gap: 1rem;
+}
+
 .combo-field {
   display: grid;
   grid-template-columns: 1fr 48px;
@@ -606,6 +622,7 @@ dd {
 .primary-action:focus-visible,
 .secondary-action:focus-visible,
 .danger-action:focus-visible,
+.details-toggle:focus-visible,
 .icon-action:focus-visible,
 .secondary-link:focus-visible,
 .file-action:focus-within,
