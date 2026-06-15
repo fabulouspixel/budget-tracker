@@ -14,6 +14,11 @@ import {
   deleteCategory,
   getCategories,
 } from "../db/categoryService";
+import {
+  getStoragePersistenceStatus,
+  requestPersistentStorage,
+  type StoragePersistenceStatus,
+} from "../db/storageService";
 import type { Category } from "../domain/types";
 
 export function SettingsPage() {
@@ -24,6 +29,9 @@ export function SettingsPage() {
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const [isImporting, setIsImporting] = useState(false);
   const [isDeletingData, setIsDeletingData] = useState(false);
+  const [storageStatus, setStorageStatus] = useState<
+    StoragePersistenceStatus | undefined
+  >();
 
   async function loadCategories() {
     setCategories(await getCategories());
@@ -31,7 +39,12 @@ export function SettingsPage() {
 
   useEffect(() => {
     void loadCategories();
+    void loadStorageStatus();
   }, []);
+
+  async function loadStorageStatus() {
+    setStorageStatus(await getStoragePersistenceStatus());
+  }
 
   async function handleExport() {
     setStatusMessage(undefined);
@@ -75,6 +88,18 @@ export function SettingsPage() {
 
     try {
       const backup = parseBackupJson(await file.text());
+      const isEmptyBackup =
+        backup.periods.length === 0 &&
+        backup.entries.length === 0 &&
+        backup.categories.length === 0;
+
+      if (
+        isEmptyBackup &&
+        !window.confirm("This backup contains no periods, entries, or categories.")
+      ) {
+        return;
+      }
+
       await replaceDataFromBackup(backup);
       await loadCategories();
       setStatusMessage("Backup imported successfully.");
@@ -137,6 +162,14 @@ export function SettingsPage() {
       return;
     }
 
+    const typedConfirmation = window.prompt(
+      'Type "DELETE" to permanently delete all local data.',
+    );
+
+    if (typedConfirmation !== "DELETE") {
+      return;
+    }
+
     setStatusMessage(undefined);
     setErrorMessage(undefined);
     setIsDeletingData(true);
@@ -149,6 +182,23 @@ export function SettingsPage() {
       setErrorMessage("Local data could not be deleted.");
     } finally {
       setIsDeletingData(false);
+    }
+  }
+
+  async function handleRequestPersistentStorage() {
+    setStatusMessage(undefined);
+    setErrorMessage(undefined);
+
+    try {
+      const status = await requestPersistentStorage();
+      setStorageStatus(status);
+      setStatusMessage(
+        status.persisted
+          ? "Storage protection is enabled for this device."
+          : "This browser did not enable storage protection.",
+      );
+    } catch {
+      setErrorMessage("Storage protection could not be requested.");
     }
   }
 
@@ -178,6 +228,33 @@ export function SettingsPage() {
           />
         </label>
       </div>
+
+      <section className="settings-panel" aria-labelledby="storage-title">
+        <h2 id="storage-title">Storage protection</h2>
+        <p className="muted">
+          Ask this browser to keep budget data out of automatic storage cleanup.
+          Backups are still required before uninstalling the app or clearing site
+          data.
+        </p>
+        {storageStatus ? (
+          <p
+            className={storageStatus.persisted ? "success-message" : "warning-message"}
+          >
+            {storageStatus.supported
+              ? storageStatus.persisted
+                ? "Protected storage is enabled."
+                : "Protected storage is not enabled."
+              : "This browser does not support protected storage."}
+          </p>
+        ) : null}
+        <button
+          className="secondary-action"
+          type="button"
+          onClick={() => void handleRequestPersistentStorage()}
+        >
+          Enable Storage Protection
+        </button>
+      </section>
 
       <section className="settings-panel" aria-labelledby="categories-title">
         <h2 id="categories-title">Categories</h2>

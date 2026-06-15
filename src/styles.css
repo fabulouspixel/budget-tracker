@@ -619,6 +619,12 @@ dd {
   font-weight: 700;
 }
 
+.warning-message {
+  margin: 0;
+  color: #8b4a25;
+  font-weight: 700;
+}
+
 .primary-action:focus-visible,
 .secondary-action:focus-visible,
 .danger-action:focus-visible,
