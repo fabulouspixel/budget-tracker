@@ -123,7 +123,9 @@ export function ActivePeriodPage() {
             <dl className="summary-grid">
               <div>
                 <dt>Current balance</dt>
-                <dd>{formatCents(balanceCents)}</dd>
+                <dd className={balanceCents < 0 ? "balance-negative" : undefined}>
+                  {formatCents(balanceCents)}
+                </dd>
               </div>
             </dl>
           ) : null}

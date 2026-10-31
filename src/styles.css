@@ -541,6 +541,10 @@ dd {
   overflow-wrap: anywhere;
 }
 
+.balance-negative {
+  color: #9a2f2f;
+}
+
 .period-list,
 .entry-list {
   display: grid;
